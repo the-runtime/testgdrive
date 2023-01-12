@@ -1,0 +1,27 @@
+{
+
+    "description": "download file directly to gdrive",
+    "manifest_version": 2,
+    "name": "downdrive",
+    "version": "1.0",
+    "homepage_url": "https://github.com/the-runtime/downdrive",
+    "icons": {
+      "48": "icons/page-48.png"
+    },
+    "background": {
+      "scripts": ["control.js" ]
+    },
+    "permissions": [
+      "downloads",
+      "downloads.pause"
+    ],
+  
+    "browser_action": {
+      "browser_style": true,
+      "default_icon": "icons/page-32.png",
+      "default_title": "Latest download",
+      "default_popup": "popup/latest_download.html"
+    }
+  
+  }
+  
