@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -48,16 +49,20 @@ func oauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//data, err := getUserDataFromGoogle(r.FormValue("code"))
-	err := uploadFile(r.FormValue("code"))
+	token, err := googleOauthConfig.Exchange(context.Background(), r.FormValue("code"))
 	if err != nil {
-		fmt.Println("Error in upload file")
-		log.Println(err.Error())
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		fmt.Println(err.Error())
 		return
 	}
 
-	data, err := getUserDataFromGoogle(r.FormValue("code"))
+	BMToken, err := json.Marshal(token)
+	if err != nil {
+		fmt.Println("marshing error", err.Error())
+	}
+	http.SetCookie(w, &http.Cookie{Name: "Token", Value: string(BMToken), Expires: time.Now().Add(20 * time.Minute)})
+	//data, err := getUserDataFromGoogle(r.FormValue("code"))
+
+	data, err := getUserDataFromGoogle(token)
 	if err != nil {
 		fmt.Println("get user data from google")
 		log.Println(err.Error())
@@ -82,13 +87,9 @@ func generateStateOauthCookie(w http.ResponseWriter) string {
 	return state
 }
 
-func getUserDataFromGoogle(code string) ([]byte, error) {
+func getUserDataFromGoogle(token *oauth2.Token) ([]byte, error) {
 	// Use code to get token and get user info from Google.
 
-	token, err := googleOauthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return nil, fmt.Errorf("code exchange wrong: %s", err.Error())
-	}
 	response, err := http.Get(oauthGoogleUrlAPI + token.AccessToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed getting user info: %s", err.Error())

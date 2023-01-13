@@ -9,6 +9,7 @@ func New() http.Handler {
 
 	mux.HandleFunc("/auth/google/login", oauthGoogleLogin)
 	mux.HandleFunc("/auth/google/callback", oauthGoogleCallback)
+	mux.HandleFunc("/test", startGdrive)
 
 	return mux
 }

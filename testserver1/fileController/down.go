@@ -1,4 +1,4 @@
-package down
+package fileController
 
 import (
 	"fmt"
@@ -56,14 +56,14 @@ func downPart(wg *sync.WaitGroup, name, url string, client http.Client, start, e
 
 }
 
-func StratDu(url string) {
+func StratDu(url string) (string, int) {
 
 	client := http.Client{}
 
 	res, err := http.Head(url)
 	if err != nil {
 		fmt.Println(err.Error())
-		return
+		return "", 0
 	}
 
 	urlSplit := strings.Split(url, "/")
@@ -71,7 +71,7 @@ func StratDu(url string) {
 
 	if res.Header.Get("Accept-Ranges") != "bytes" {
 		fmt.Println("unable to download file in multipart")
-		return
+		return "", 0
 	}
 
 	cntLen, err := strconv.Atoi(res.Header.Get("Content-Length"))
@@ -102,5 +102,6 @@ func StratDu(url string) {
 	}
 
 	wg.Wait()
+	return filename, tot
 
 }
