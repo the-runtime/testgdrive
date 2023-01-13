@@ -55,11 +55,12 @@ func oauthGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	BMToken, err := json.Marshal(token)
+	BMToken, err := json.Marshal(*token)
 	if err != nil {
-		fmt.Println("marshing error", err.Error())
+		fmt.Println("marsling error", err.Error())
 	}
-	http.SetCookie(w, &http.Cookie{Name: "Token", Value: string(BMToken), Expires: time.Now().Add(20 * time.Minute)})
+	fmt.Println(string(BMToken))
+	http.SetCookie(w, &http.Cookie{Name: "Token", Value: string(BMToken), Path: "/test", Expires: time.Now().Add(20 * time.Minute)})
 	//data, err := getUserDataFromGoogle(r.FormValue("code"))
 
 	data, err := getUserDataFromGoogle(token)

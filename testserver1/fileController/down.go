@@ -56,21 +56,60 @@ func downPart(wg *sync.WaitGroup, name, url string, client http.Client, start, e
 
 }
 
+func downPart2(url, filename string, client http.Client) {
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer res.Body.Close()
+
+	f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	defer f.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	_, err = f.Write(body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
 func StratDu(url string) (string, int) {
 
 	client := http.Client{}
 
+	urlSplit := strings.Split(url, "/")
+	filename := urlSplit[len(urlSplit)-1]
 	res, err := http.Head(url)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", 0
 	}
 
-	urlSplit := strings.Split(url, "/")
-	filename := urlSplit[len(urlSplit)-1]
+	// urlSplit := strings.Split(url, "/")
+	// filename := urlSplit[len(urlSplit)-1]
 
 	if res.Header.Get("Accept-Ranges") != "bytes" {
 		fmt.Println("unable to download file in multipart")
+		fmt.Println("starting full download")
+		downPart2(url, filename, client)
 		return "", 0
 	}
 
@@ -80,7 +119,7 @@ func StratDu(url string) (string, int) {
 		fmt.Println("cntLen error")
 	}
 
-	amDown := 5 * 1024 * 1024
+	amDown := 5 * 1024 * 1024 * 1024
 	tot := cntLen / amDown
 
 	wg := sync.WaitGroup{}
