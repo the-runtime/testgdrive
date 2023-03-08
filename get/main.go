@@ -23,6 +23,7 @@ func main() {
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		fmt.Printf("%v", err)
+		fmt.Println("Hello world")
 	} else {
 		fmt.Println("Server closed!")
 	}
